@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FOCUS — Mathéo</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Playfair+Display:ital@1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111111;
+    --border: #1e1e1e;
+    --text: #e8e4dc;
+    --muted: #4a4a4a;
+    --accent: #c8f060;
+    --accent2: #f0a030;
+    --danger: #ff4444;
+    --done-bg: #141a0a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  .container {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  /* Header */
+  .header {
+    margin-bottom: 48px;
+    animation: fadeDown 0.6s ease both;
+  }
+
+  .date-line {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(64px, 15vw, 100px);
+    line-height: 0.9;
+    letter-spacing: 0.02em;
+    color: var(--text);
+  }
+
+  .title span {
+    color: var(--accent);
+  }
+
+  .tagline {
+    margin-top: 16px;
+    font-size: 12px;
+    color: var(--muted);
+    font-style: italic;
+    font-family: 'Playfair Display', serif;
+    letter-spacing: 0.05em;
+  }
+
+  /* Progress bar */
+  .progress-section {
+    margin-bottom: 40px;
+    animation: fadeDown 0.6s 0.1s ease both;
+  }
+
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .progress-label .count {
+    font-size: 20px;
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 0.05em;
+    color: var(--accent);
+  }
+
+  .progress-track {
+    height: 2px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 12px var(--accent);
+  }
+
+  /* Objectives */
+  .objectives {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 40px;
+  }
+
+  .obj-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid transparent;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .obj-item:nth-child(1) { animation-delay: 0.15s; border-left-color: #c8f060; }
+  .obj-item:nth-child(2) { animation-delay: 0.2s;  border-left-color: #60c8f0; }
+  .obj-item:nth-child(3) { animation-delay: 0.25s; border-left-color: #f0a030; }
+  .obj-item:nth-child(4) { animation-delay: 0.3s;  border-left-color: #f060a0; }
+  .obj-item:nth-child(5) { animation-delay: 0.35s; border-left-color: #a060f0; }
+  .obj-item:nth-child(6) { animation-delay: 0.4s;  border-left-color: #f0e060; }
+
+  .obj-item:hover {
+    background: #161616;
+    transform: translateX(4px);
+  }
+
+  .obj-item.done {
+    background: var(--done-bg);
+    border-color: #1e2a0a;
+  }
+
+  .obj-item.done .obj-text {
+    text-decoration: line-through;
+    color: var(--muted);
+  }
+
+  .obj-item.done .obj-icon {
+    filter: grayscale(0.5);
+  }
+
+  .obj-item.done::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(200,240,96,0.03));
+  }
+
+  .checkbox {
+    width: 22px;
+    height: 22px;
+    border: 1.5px solid var(--muted);
+    border-radius: 3px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    position: relative;
+    z-index: 1;
+  }
+
+  .obj-item.done .checkbox {
+    border-color: var(--accent);
+    background: var(--accent);
+  }
+
+  .checkmark {
+    opacity: 0;
+    color: #0a0a0a;
+    font-size: 13px;
+    font-weight: 900;
+    transition: opacity 0.2s ease;
+  }
+
+  .obj-item.done .checkmark { opacity: 1; }
+
+  .obj-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .obj-content {
+    flex: 1;
+    position: relative;
+    z-index: 1;
+  }
+
+  .obj-text {
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    transition: color 0.2s ease;
+  }
+
+  .obj-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 3px;
+    letter-spacing: 0.05em;
+  }
+
+  /* Coach message */
+  .coach-box {
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent2);
+    padding: 20px 24px;
+    margin-bottom: 40px;
+    background: #0f0d08;
+    animation: fadeUp 0.5s 0.45s ease both;
+    position: relative;
+  }
+
+  .coach-label {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 10px;
+  }
+
+  .coach-text {
+    font-size: 13px;
+    line-height: 1.7;
+    color: #b8b4ac;
+    font-style: italic;
+    font-family: 'Playfair Display', serif;
+  }
+
+  .coach-text strong {
+    color: var(--text);
+    font-style: normal;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+  }
+
+  /* Actions */
+  .actions {
+    display: flex;
+    gap: 12px;
+    animation: fadeUp 0.5s 0.5s ease both;
+  }
+
+  .btn {
+    flex: 1;
+    padding: 14px 20px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn:hover {
+    background: #161616;
+    border-color: var(--muted);
+  }
+
+  .btn-reset {
+    border-color: #2a1a1a;
+    color: var(--muted);
+  }
+
+  .btn-reset:hover {
+    border-color: var(--danger);
+    color: var(--danger);
+    background: #110a0a;
+  }
+
+  /* Completion state */
+  .completion-msg {
+    display: none;
+    text-align: center;
+    padding: 32px 24px;
+    border: 1px solid #1e2a0a;
+    background: var(--done-bg);
+    margin-top: 24px;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  .completion-msg.show { display: block; }
+
+  .completion-msg .big {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+    line-height: 1;
+  }
+
+  .completion-msg p {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 8px;
+    letter-spacing: 0.1em;
+  }
+
+  /* Divider */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 40px 0;
+    animation: fadeDown 0.5s 0.1s ease both;
+  }
+
+  /* Last reset info */
+  .reset-info {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-align: center;
+    margin-top: 24px;
+    opacity: 0.6;
+    animation: fadeUp 0.5s 0.55s ease both;
+  }
+
+  /* Animations */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* Check animation */
+  @keyframes checkBounce {
+    0%   { transform: scale(0.8); }
+    50%  { transform: scale(1.15); }
+    100% { transform: scale(1); }
+  }
+
+  .obj-item.just-checked .checkbox {
+    animation: checkBounce 0.3s ease both;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <div class="date-line" id="dateDisplay">—</div>
+    <div class="title">FOCUS<br><span>MATHÉO</span></div>
+    <div class="tagline">Ce que tu fais aujourd'hui construit demain.</div>
+  </div>
+
+  <div class="progress-section">
+    <div class="progress-label">
+      <span>Progression du jour</span>
+      <span class="count" id="progressCount">0 / 6</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+    </div>
+  </div>
+
+  <div class="objectives" id="objectives">
+
+    <div class="obj-item" data-id="music" onclick="toggleItem(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="obj-icon">🎛️</div>
+      <div class="obj-content">
+        <div class="obj-text">Faire de la musique</div>
+        <div class="obj-sub">FL Studio — même 20 min. Rien ne se crée sans action.</div>
+      </div>
+    </div>
+
+    <div class="obj-item" data-id="piano" onclick="toggleItem(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="obj-icon">🎹</div>
+      <div class="obj-content">
+        <div class="obj-text">Piano</div>
+        <div class="obj-sub">Pratique, explore, improvise. Les doigts ont de la mémoire.</div>
+      </div>
+    </div>
+
+    <div class="obj-item" data-id="trading" onclick="toggleItem(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="obj-icon">📈</div>
+      <div class="obj-content">
+        <div class="obj-text">Trading / analyse marché</div>
+        <div class="obj-sub">NAS100 — structure, OB, FVG. Analyse ou journal de trade.</div>
+      </div>
+    </div>
+
+    <div class="obj-item" data-id="sport" onclick="toggleItem(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="obj-icon">💪</div>
+      <div class="obj-content">
+        <div class="obj-text">Sport / bouger</div>
+        <div class="obj-sub">Le corps alimente l'esprit. Pas d'excuse.</div>
+      </div>
+    </div>
+
+    <div class="obj-item" data-id="read" onclick="toggleItem(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="obj-icon">📖</div>
+      <div class="obj-content">
+        <div class="obj-text">Lire</div>
+        <div class="obj-sub">10 pages minimum. Chaque livre change ta façon de penser.</div>
+      </div>
+    </div>
+
+    <div class="obj-item" data-id="journal" onclick="toggleItem(this)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <div class="obj-icon">✍️</div>
+      <div class="obj-content">
+        <div class="obj-text">Écrire mes pensées</div>
+        <div class="obj-sub">Journal, idées, paroles. Externalise ce qui tourne dans ta tête.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="completion-msg" id="completionMsg">
+    <div class="big">JOURNÉE<br>GAGNÉE</div>
+    <p>T'as tout coché. C'est ça la différence.</p>
+  </div>
+
+  <div class="coach-box" id="coachBox">
+    <div class="coach-label">⚡ Message du jour</div>
+    <div class="coach-text" id="coachText">—</div>
+  </div>
+
+  <div class="actions">
+    <button class="btn" onclick="closeAndGo()">↗ Continuer quand même</button>
+    <button class="btn btn-reset" onclick="resetDay()">↺ Reset journée</button>
+  </div>
+
+  <div class="reset-info" id="resetInfo">—</div>
+
+</div>
+
+<script>
+  const STORAGE_KEY = 'focus_matho_v1';
+  const RESET_KEY = 'focus_reset_date';
+
+  const coaches = [
+    "T'es sur ton téléphone. <strong>Mais t'as des choses à construire.</strong> Le scroll ne t'a jamais rien apporté. Ferme ça, ouvre FL Studio.",
+    "Chaque heure perdue sur les réseaux, c'est une heure que quelqu'un d'autre a mis dans son craft. <strong>C'est toi qui choisis.</strong>",
+    "Le musicien que tu veux être n'est pas sur Instagram. <strong>Il est dans le travail.</strong> Reviens.",
+    "Tu peux faire défiler pendant une heure et te sentir vide, ou travailler 30 min et te sentir vivant. <strong>C'est un choix conscient.</strong>",
+    "Les grands traders, les grands artistes — ils ont tous une chose en commun : <strong>ils n'ont pas attendu d'avoir envie.</strong> Ils ont commencé.",
+    "Tes objectifs ne s'accomplissent pas en regardant la vie des autres. <strong>Retourne à la tienne.</strong>",
+    "Tu sais ce que tu devrais faire. <strong>Tu l'as toujours su.</strong> Maintenant fais-le.",
+    "Le piano ne sonne pas tout seul. FL Studio ne produit pas sans toi. <strong>Ta version future compte sur toi maintenant.</strong>",
+  ];
+
+  function getState() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } 
+    catch { return {}; }
+  }
+
+  function saveState(s) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+  }
+
+  function checkAutoReset() {
+    const today = new Date().toDateString();
+    const lastReset = localStorage.getItem(RESET_KEY);
+    if (lastReset !== today) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({}));
+      localStorage.setItem(RESET_KEY, today);
+    }
+  }
+
+  function updateDate() {
+    const now = new Date();
+    const days = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+    const months = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+    document.getElementById('dateDisplay').textContent = 
+      `${days[now.getDay()]} ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+  }
+
+  function updateProgress() {
+    const state = getState();
+    const items = document.querySelectorAll('.obj-item');
+    let done = 0;
+    items.forEach(item => {
+      if (state[item.dataset.id]) {
+        item.classList.add('done');
+        done++;
+      } else {
+        item.classList.remove('done');
+      }
+    });
+    const total = items.length;
+    document.getElementById('progressCount').textContent = `${done} / ${total}`;
+    document.getElementById('progressFill').style.width = `${(done/total)*100}%`;
+    document.getElementById('completionMsg').classList.toggle('show', done === total);
+  }
+
+  function toggleItem(el) {
+    const state = getState();
+    const id = el.dataset.id;
+    state[id] = !state[id];
+    saveState(state);
+    el.classList.add('just-checked');
+    setTimeout(() => el.classList.remove('just-checked'), 300);
+    updateProgress();
+  }
+
+  function resetDay() {
+    if (confirm('Reset toute la journée ?')) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({}));
+      localStorage.setItem(RESET_KEY, new Date().toDateString());
+      updateProgress();
+      updateResetInfo();
+    }
+  }
+
+  function updateResetInfo() {
+    const lastReset = localStorage.getItem(RESET_KEY);
+    document.getElementById('resetInfo').textContent = lastReset 
+      ? `Dernière remise à zéro : ${lastReset}` 
+      : 'Aucun reset enregistré';
+  }
+
+  function closeAndGo() {
+    window.history.back();
+  }
+
+  function setCoach() {
+    const idx = new Date().getDate() % coaches.length;
+    document.getElementById('coachText').innerHTML = coaches[idx];
+  }
+
+  // Init
+  checkAutoReset();
+  updateDate();
+  updateProgress();
+  updateResetInfo();
+  setCoach();
+</script>
+</body>
+</html>
